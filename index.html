@@ -1,0 +1,1022 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SILOGBOOK – Logbook Profesi Dietisien</title>
+<meta name="theme-color" content="#0e3b5c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+:root{
+  --navy:#0e3b5c; --navy-2:#0a2c45; --hijau:#0f8a6a; --hijau-muda:#e3f4ee;
+  --latar:#f3f6f9; --kartu:#fff; --garis:#dde4ea; --teks:#1d2b36; --redup:#61707c;
+  --kuning:#b7791f; --kuning-muda:#fdf3dc; --merah:#c0392b; --merah-muda:#fbe6e3;
+  --abu:#6b7785; --abu-muda:#eef1f4; --biru-muda:#e5f0fa;
+  --r:12px; --bayang:0 1px 2px rgba(16,40,60,.06),0 4px 14px rgba(16,40,60,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--latar);color:var(--teks);font-size:14.5px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--hijau)}
+.tersembunyi{display:none!important}
+
+/* ---------- login ---------- */
+.login-wrap{min-height:100%;display:grid;place-items:center;padding:24px 16px;background:linear-gradient(160deg,var(--navy) 0%,#145a74 55%,var(--hijau) 100%)}
+.login-kartu{background:#fff;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.25);width:100%;max-width:400px;padding:32px 28px}
+.logo-bulat{width:54px;height:54px;border-radius:14px;background:var(--hijau-muda);display:grid;place-items:center;color:var(--hijau);margin-bottom:14px}
+.login-kartu h1{font-size:22px;margin:0}
+.login-kartu .sub{color:var(--redup);margin:4px 0 22px;font-size:13.5px}
+
+/* ---------- shell ---------- */
+.shell{display:flex;min-height:100%}
+.sidebar{width:248px;background:var(--navy);color:#cfe0ec;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:40;transition:transform .2s}
+.brand{padding:20px 20px 16px;display:flex;gap:11px;align-items:center;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand .ikon{width:38px;height:38px;border-radius:10px;background:var(--hijau);display:grid;place-items:center;color:#fff;flex:none}
+.brand b{color:#fff;display:block;font-size:15.5px;letter-spacing:.3px}
+.brand small{font-size:11.5px;opacity:.75}
+.menu{padding:12px 10px;flex:1;overflow:auto}
+.menu button{display:flex;align-items:center;gap:11px;width:100%;border:0;background:none;color:inherit;padding:10px 12px;border-radius:9px;cursor:pointer;text-align:left;font-weight:500;margin-bottom:2px}
+.menu button:hover{background:rgba(255,255,255,.07);color:#fff}
+.menu button.aktif{background:var(--hijau);color:#fff}
+.menu .jml{margin-left:auto;background:#f6b93b;color:#3d2a00;font-size:11.5px;font-weight:700;border-radius:20px;padding:1px 8px}
+.pengguna{padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);font-size:12.5px}
+.pengguna b{color:#fff;display:block;font-size:13.5px}
+.utama{flex:1;margin-left:248px;min-width:0;display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid var(--garis);padding:12px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:20}
+.topbar h2{font-size:17px;margin:0}
+.hamburger{display:none;border:0;background:var(--abu-muda);border-radius:8px;padding:7px;cursor:pointer}
+.konten{padding:22px 24px 40px;max-width:1180px;width:100%}
+.tirai{display:none}
+@media (max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.buka{transform:none}
+  .tirai.buka{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:30}
+  .utama{margin-left:0}
+  .hamburger{display:inline-grid}
+  .topbar{padding:10px 16px}
+  .konten{padding:16px 16px 40px}
+}
+
+/* ---------- komponen ---------- */
+.kartu{background:var(--kartu);border-radius:var(--r);box-shadow:var(--bayang);padding:18px 20px;margin-bottom:16px}
+.kartu h3{margin:0 0 4px;font-size:15.5px}
+.redup{color:var(--redup)}
+.kecil{font-size:12.5px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.stat{background:#fff;border-radius:var(--r);box-shadow:var(--bayang);padding:14px 16px;border-left:4px solid var(--hijau)}
+.stat b{font-size:24px;display:block;line-height:1.2}
+.stat span{color:var(--redup);font-size:12.5px}
+.btn{border:1px solid var(--garis);background:#fff;border-radius:9px;padding:8px 14px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--abu-muda)}
+.btn.utama-btn{background:var(--hijau);border-color:var(--hijau);color:#fff}
+.btn.utama-btn:hover{background:#0c7559}
+.btn.navy{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.bahaya{color:var(--merah);border-color:#f0c4be}
+.btn.bahaya:hover{background:var(--merah-muda)}
+.btn.kuning{background:var(--kuning);border-color:var(--kuning);color:#fff}
+.btn.kcl{padding:5px 10px;font-size:12.5px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.baris-aksi{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lbl{display:block;font-size:12.5px;font-weight:600;margin:0 0 5px;color:#38485a}
+.inp{width:100%;border:1px solid var(--garis);border-radius:9px;padding:9px 11px;background:#fff}
+.inp:focus{outline:2px solid #9fd8c6;border-color:var(--hijau)}
+textarea.inp{resize:vertical;min-height:74px}
+.fld{margin-bottom:12px}
+.badge{display:inline-block;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700}
+.st-draft{background:var(--abu-muda);color:var(--abu)}
+.st-diajukan{background:var(--kuning-muda);color:var(--kuning)}
+.st-dikembalikan{background:var(--merah-muda);color:var(--merah)}
+.st-diverifikasi{background:var(--hijau-muda);color:var(--hijau)}
+.st-belum{background:#fff;color:var(--merah);border:1px dashed #e7a9a1}
+.tabel-wrap{overflow-x:auto;border:1px solid var(--garis);border-radius:10px}
+table.tb{width:100%;border-collapse:collapse;font-size:13.5px}
+.tb th{background:#f5f8fa;text-align:left;font-weight:600;padding:9px 11px;border-bottom:1px solid var(--garis);white-space:nowrap}
+.tb td{padding:9px 11px;border-bottom:1px solid #edf1f4;vertical-align:top}
+.tb tr:last-child td{border-bottom:0}
+.prog{height:7px;background:var(--abu-muda);border-radius:9px;overflow:hidden;min-width:90px}
+.prog i{display:block;height:100%;background:var(--hijau)}
+.alert{border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:13.5px}
+.alert.merah{background:var(--merah-muda);color:#7d2219}
+.alert.kuning{background:var(--kuning-muda);color:#6b4a0c}
+.alert.hijau{background:var(--hijau-muda);color:#0b5a46}
+.alert.biru{background:var(--biru-muda);color:#14476d}
+.kosong{text-align:center;padding:30px 10px;color:var(--redup)}
+.item{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #edf1f4}
+.item:last-child{border-bottom:0}
+.item .isi{flex:1;min-width:0}
+.keg{border:1px solid var(--garis);border-radius:10px;padding:12px;margin-bottom:10px;background:#fbfcfd}
+.keg-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.keg-no{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:12.5px;font-weight:700;flex:none}
+.jam{display:flex;gap:6px;align-items:center}
+.jam input{max-width:120px}
+.cari{max-width:260px}
+.chip-list{max-height:220px;overflow:auto;border:1px solid var(--garis);border-radius:9px;padding:6px}
+.chip-list label{display:flex;gap:8px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:13.5px}
+.chip-list label:hover{background:var(--abu-muda)}
+
+/* kertas pratinjau */
+.kertas{background:#fff;border:1px solid var(--garis);padding:22px;font-family:'Times New Roman',Times,serif;font-size:14px;color:#000}
+.kertas .judul{text-align:center;font-weight:700;line-height:1.35;margin-bottom:12px}
+.kertas table{width:100%;border-collapse:collapse;margin-bottom:12px}
+.kertas td,.kertas th{border:1px solid #000;padding:4px 6px;vertical-align:top}
+.kertas th{background:#ddebf7}
+.ttd{text-align:right;margin-top:14px}
+.ttd .qr{display:inline-block;margin:6px 0}
+.ttd .qr svg{width:84px;height:84px}
+
+/* modal, toast, loading */
+.modal{position:fixed;inset:0;background:rgba(10,30,45,.5);z-index:60;display:flex;align-items:flex-start;justify-content:center;padding:30px 12px;overflow:auto}
+.modal-kotak{background:#fff;border-radius:14px;width:100%;max-width:820px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-kotak.sempit{max-width:460px}
+.modal-head{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--garis)}
+.modal-head h3{margin:0;font-size:16px;flex:1}
+.modal-body{padding:18px}
+.modal-foot{padding:12px 18px;border-top:1px solid var(--garis);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.x{border:0;background:none;font-size:22px;cursor:pointer;line-height:1;color:var(--redup)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1d2b36;color:#fff;padding:10px 18px;border-radius:10px;z-index:90;font-size:13.5px;max-width:92%;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+#toast.err{background:var(--merah)}
+#loading{position:fixed;inset:0;background:rgba(255,255,255,.6);z-index:80;display:grid;place-items:center}
+.spin{width:42px;height:42px;border:4px solid #cfe5dd;border-top-color:var(--hijau);border-radius:50%;animation:p .8s linear infinite}
+@keyframes p{to{transform:rotate(360deg)}}
+.timeline{font-size:13px;border-left:2px solid var(--garis);padding-left:12px;margin-top:6px}
+.timeline div{margin-bottom:6px}
+.verif{max-width:520px;margin:0 auto}
+.verif .ikon-besar{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;margin:0 auto 10px}
+.vf-wrap{min-height:100%;padding:20px 16px 30px;background:linear-gradient(180deg,var(--navy) 0,var(--navy) 150px,var(--latar) 150px)}
+.vf-isi{max-width:860px;margin:0 auto}
+.vf-sah{display:flex;gap:14px;align-items:center;border-left:5px solid var(--hijau)}
+.vf-sah .ikon-besar{width:52px;height:52px;flex:none;border-radius:50%;display:grid;place-items:center}
+.vf-aksi{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+dl.det{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;margin:0;font-size:14px}
+dl.det dt{color:var(--redup)}
+dl.det dd{margin:0;font-weight:600}
+@media (max-width:560px){dl.det{grid-template-columns:1fr}dl.det dd{margin-bottom:6px}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="loading" class="tersembunyi"><div class="spin"></div></div>
+<div id="toast" class="tersembunyi"></div>
+
+<script>
+/* =========================================================
+   KONFIGURASI — ganti dengan URL Web App Apps Script Anda
+   ========================================================= */
+const API_URL = 'https://script.google.com/macros/s/AKfycbzZOB3MyyGPsbzi9NuXuUs8W3M6RRuXFMWVdYuIyuC_iIw7wqK9UdNZOjP_r8nJy1p7/exec';
+const INSTANSI = {
+  prodi: 'PROGRAM STUDI PENDIDIKAN PROFESI DIETISIEN',
+  jurusan: 'JURUSAN GIZI POLTEKKES KEMENKES MAKASSAR',
+  judul: 'LEMBAR KEGIATAN HARIAN',
+  kota: 'Makassar'
+};
+
+// ==PDF-START==
+const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+function tglIndo(iso, hari) {
+  if (!iso) return '';
+  const [y, m, d] = iso.slice(0, 10).split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return (hari ? HARI[dt.getUTCDay()] + ', ' : '') + d + ' ' + BULAN[m - 1] + ' ' + y;
+}
+function formatNip(n) {
+  const s = String(n || '').replace(/\s/g, '');
+  return /^\d{18}$/.test(s) ? s.slice(0, 8) + ' ' + s.slice(8, 14) + ' ' + s.slice(14, 15) + ' ' + s.slice(15) : String(n || '');
+}
+function qrMatriks(teks) {
+  const q = qrcode(0, 'M');
+  q.addData(teks);
+  q.make();
+  return { n: q.getModuleCount(), gelap: (r, c) => q.isDark(r, c) };
+}
+
+/** daftar: [{mhs, penempatan, logbook:[...]}], dasarUrl: alamat halaman verifikasi */
+async function buatPdf(daftar, dasarUrl) {
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const pdf = await PDFDocument.create();
+  pdf.setTitle('Logbook Kegiatan Harian');
+  pdf.setCreator('SILOGBOOK');
+  const F = await pdf.embedFont(StandardFonts.TimesRoman);
+  const FB = await pdf.embedFont(StandardFonts.TimesRomanBold);
+  const FI = await pdf.embedFont(StandardFonts.TimesRomanItalic);
+  const W = 595.28, H = 841.89, L = 41, R = 555, BAWAH = 50;
+  const HITAM = rgb(0, 0, 0), BIRU = rgb(0.867, 0.922, 0.969);
+  const KOL = [L, 67, 140, 300, R]; // No | Jam | Rencana | Implementasi
+  const UK = 11, LH = 12.8, PAD = 4;
+
+  const cache = new Map();
+  const GANTI = { '≥': '>=', '≤': '<=', '→': '->', '←': '<-', '≠': '!=', '≈': '~', '✓': 'v', '✔': 'v', '−': '-', ' ': ' ' };
+  function bersih(font, s) {
+    s = String(s == null ? '' : s).replace(/\t/g, ' ').replace(/\r/g, '')
+      .replace(/[≥≤→←≠≈✓✔− ]/g, c => GANTI[c]).replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}️‍]/gu, '');
+    let out = '';
+    for (const ch of s) {
+      if (ch === '\n') { out += ch; continue; }
+      const k = font.name + ch;
+      if (!cache.has(k)) { try { font.encodeText(ch); cache.set(k, true); } catch (e) { cache.set(k, false); } }
+      out += cache.get(k) ? ch : '?';
+    }
+    return out;
+  }
+  function bungkus(font, size, teks, lebar) {
+    const hasil = [];
+    bersih(font, teks).split('\n').forEach(par => {
+      const kata = par.split(/ +/);
+      let baris = '';
+      kata.forEach(k => {
+        const coba = baris ? baris + ' ' + k : k;
+        if (font.widthOfTextAtSize(coba, size) <= lebar) { baris = coba; return; }
+        if (baris) hasil.push(baris);
+        // kata terlalu panjang: potong per huruf
+        while (font.widthOfTextAtSize(k, size) > lebar) {
+          let i = k.length;
+          while (i > 1 && font.widthOfTextAtSize(k.slice(0, i), size) > lebar) i--;
+          hasil.push(k.slice(0, i)); k = k.slice(i);
+        }
+        baris = k;
+      });
+      hasil.push(baris);
+    });
+    return hasil;
+  }
+  function tulis(pg, s, x, y, font, size, rata) {
+    s = bersih(font, s);
+    const w = font.widthOfTextAtSize(s, size);
+    if (rata === 'tengah') x -= w / 2;
+    if (rata === 'kanan') x -= w;
+    pg.drawText(s, { x, y: H - y, size, font, color: HITAM });
+  }
+  function garis(pg, x1, y1, x2, y2) {
+    pg.drawLine({ start: { x: x1, y: H - y1 }, end: { x: x2, y: H - y2 }, thickness: 0.6, color: HITAM });
+  }
+  function kotak(pg, x, y, w, h, isi) {
+    const o = { x, y: H - y - h, width: w, height: h, borderColor: HITAM, borderWidth: 0.6 };
+    if (isi) o.color = isi;
+    pg.drawRectangle(o);
+  }
+
+  function kepalaHalaman(pg, mhs, pen, tanggal) {
+    const tengah = (L + R) / 2;
+    tulis(pg, INSTANSI.prodi, tengah, 48, FB, 12, 'tengah');
+    tulis(pg, INSTANSI.jurusan, tengah, 62, FB, 12, 'tengah');
+    tulis(pg, INSTANSI.judul, tengah, 76, FB, 12, 'tengah');
+    const lokasiMk = pen.lokasi ? pen.lokasi + ' / ' + pen.mata_kuliah : pen.mata_kuliah;
+    const isi = [
+      ['Nama Mahasiswa / NIM', mhs.nama + ' / ' + mhs.nim],
+      ['Lokasi / Mata Kuliah', lokasiMk],
+      ['Hari / Tanggal', tglIndo(tanggal, true)]
+    ];
+    const SPLIT = 299;
+    let y = 89;
+    isi.forEach(([a, b]) => {
+      const bar = bungkus(F, UK, ': ' + b, R - SPLIT - 10);
+      const h = Math.max(20, bar.length * LH + 7);
+      kotak(pg, L, y, R - L, h);
+      garis(pg, SPLIT, y, SPLIT, y + h);
+      tulis(pg, a, L + 5, y + 14, F, UK);
+      bar.forEach((t, i) => tulis(pg, t, SPLIT + 5, y + 14 + i * LH, F, UK));
+      y += h;
+    });
+    return y;
+  }
+  function kepalaTabel(pg, y) {
+    const h = 24;
+    kotak(pg, L, y, R - L, h, BIRU);
+    ['No', 'Jam', 'Rencana Kegiatan', 'Implementasi dan Evaluasi Kegiatan'].forEach((t, i) => {
+      if (i) garis(pg, KOL[i], y, KOL[i], y + h);
+      tulis(pg, t, (KOL[i] + KOL[i + 1]) / 2, y + 15.5, FB, UK, 'tengah');
+    });
+    return y + h;
+  }
+
+  for (const set of daftar) {
+    for (const lb of set.logbook) {
+      let pg = pdf.addPage([W, H]);
+      let y = kepalaHalaman(pg, set.mhs, set.penempatan, lb.tanggal) + 18;
+      y = kepalaTabel(pg, y);
+      lb.kegiatan.forEach((k, idx) => {
+        const sel = [String(idx + 1), k.jam || '', k.rencana || '', k.implementasi || '']
+          .map((t, i) => bungkus(F, UK, t, KOL[i + 1] - KOL[i] - 2 * PAD - 1));
+        const h = Math.max(...sel.map(s => s.length)) * LH + 2 * PAD + 6;
+        if (y + h > H - BAWAH) { // pindah halaman, ulang kepala tabel
+          pg = pdf.addPage([W, H]);
+          y = kepalaTabel(pg, 50);
+        }
+        kotak(pg, L, y, R - L, h);
+        for (let i = 1; i < 4; i++) garis(pg, KOL[i], y, KOL[i], y + h);
+        sel.forEach((bar, i) => bar.forEach((t, j) => tulis(pg, t, KOL[i] + PAD, y + PAD + 9.5 + j * LH, F, UK)));
+        y += h;
+      });
+
+      // blok tanda tangan (QR)
+      const QR = 62;
+      if (y + 40 + QR + 60 > H - BAWAH + 20) { pg = pdf.addPage([W, H]); y = 40; }
+      let ty = y + 40;
+      const tglTtd = (lb.waktu_verifikasi || lb.tanggal).slice(0, 10);
+      tulis(pg, INSTANSI.kota + ', ' + tglIndo(lb.tanggal), R, ty, F, UK, 'kanan');
+      tulis(pg, 'Pembimbing Lahan', R, ty + 13, F, UK, 'kanan');
+      const nama = lb.nama_ci || '';
+      const nip = 'NIP. ' + formatNip(lb.nip_ci);
+      const lebarNama = Math.max(F.widthOfTextAtSize(bersih(F, nama), UK), F.widthOfTextAtSize(nip, UK));
+      const qx = R - lebarNama / 2 - QR / 2, qy = ty + 20;
+      const m = qrMatriks(dasarUrl + '?v=' + lb.kode_verifikasi);
+      const sel = QR / m.n;
+      for (let r = 0; r < m.n; r++) for (let c = 0; c < m.n; c++)
+        if (m.gelap(r, c)) pg.drawRectangle({ x: qx + c * sel, y: H - (qy + (r + 1) * sel), width: sel + 0.05, height: sel + 0.05, color: HITAM });
+      tulis(pg, nama, R, qy + QR + 14, F, UK, 'kanan');
+      tulis(pg, nip, R, qy + QR + 27, F, UK, 'kanan');
+      tulis(pg, 'Ditandatangani secara elektronik pada ' + tglIndo(tglTtd) + (lb.waktu_verifikasi ? ' pukul ' + lb.waktu_verifikasi.slice(11, 16) + ' WITA' : ''), R, qy + QR + 41, FI, 7.5, 'kanan');
+      tulis(pg, 'Pindai QR untuk memeriksa keabsahan. Kode: ' + lb.kode_verifikasi, R, qy + QR + 50, FI, 7.5, 'kanan');
+    }
+  }
+  return await pdf.save();
+}
+// ==PDF-END==
+
+/* =================== UTILITAS =================== */
+const S = { token: null, user: null, d: null, menu: null, form: null, verif: null };
+try { S.token = localStorage.getItem('lb_token'); S.user = JSON.parse(localStorage.getItem('lb_user') || 'null'); } catch (e) {}
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const hariIni = () => new Date().toLocaleDateString('sv-SE');
+const STATUS = { draft: 'Draft', diajukan: 'Menunggu verifikasi', dikembalikan: 'Dikembalikan', diverifikasi: 'Terverifikasi', belum: 'Belum diisi' };
+const badge = st => `<span class="badge st-${st}">${STATUS[st] || st}</span>`;
+const dasarUrl = () => location.origin + location.pathname;
+
+function loading(on) { $('#loading').classList.toggle('tersembunyi', !on); }
+let tTimer;
+function toast(p, err) {
+  const t = $('#toast'); t.textContent = p; t.className = err ? 'err' : ''; clearTimeout(tTimer);
+  tTimer = setTimeout(() => t.className = 'tersembunyi', 3800);
+}
+async function api(aksi, data) {
+  if (API_URL.indexOf('http') !== 0) throw new Error('API_URL belum diisi di index.html');
+  const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ aksi, data: data || {}, token: S.token }) });
+  const j = await r.json();
+  if (!j.ok) {
+    if (j.pesan === 'SESI_HABIS') { keluar(true); throw new Error('Sesi berakhir, silakan login kembali'); }
+    throw new Error(j.pesan || 'Terjadi kesalahan');
+  }
+  return j;
+}
+async function jalan(fn, pesanOk) {
+  loading(true);
+  try { const r = await fn(); if (pesanOk !== false) toast(pesanOk || (r && r.pesan) || 'Berhasil'); return r; }
+  catch (e) { toast(e.message, true); throw e; }
+  finally { loading(false); }
+}
+function hariWajib(p, sampai) {
+  const akhir = [p.tgl_selesai, sampai || hariIni()].sort()[0];
+  const out = [];
+  const d = new Date(p.tgl_mulai + 'T00:00:00Z');
+  while (d.toISOString().slice(0, 10) <= akhir) {
+    if (d.getUTCDay() !== 0) out.push(d.toISOString().slice(0, 10)); // Minggu libur
+    d.setUTCDate(d.getUTCDate() + 1);
+  }
+  return out;
+}
+function unduhFile(bytes, nama, tipe) {
+  const url = URL.createObjectURL(new Blob([bytes], { type: tipe || 'application/pdf' }));
+  const a = document.createElement('a'); a.href = url; a.download = nama; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
+}
+const namaFile = s => String(s).replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_').slice(0, 60);
+function modal(judul, isi, foot, sempit) {
+  tutupModal();
+  const m = document.createElement('div'); m.className = 'modal'; m.id = 'modal';
+  m.innerHTML = `<div class="modal-kotak ${sempit ? 'sempit' : ''}"><div class="modal-head"><h3>${judul}</h3><button class="x" onclick="tutupModal()">&times;</button></div>
+    <div class="modal-body">${isi}</div>${foot ? `<div class="modal-foot">${foot}</div>` : ''}</div>`;
+  m.addEventListener('click', e => { if (e.target === m) tutupModal(); });
+  document.body.appendChild(m);
+}
+function tutupModal() { const m = $('#modal'); if (m) m.remove(); }
+const IK = {
+  home: '<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  pena: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',
+  daftar: '<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+  cek: '<path d="M20 6L9 17l-5-5"/>',
+  org: '<circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 1 0 0-6M22 21c0-3-2-5-5-5"/>',
+  grafik: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  kal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  peta: '<path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  akun: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  buku: '<path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 8h6M8 12h6"/>',
+  unduh: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'
+};
+const ikon = (n, s) => `<svg width="${s || 18}" height="${s || 18}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IK[n]}</svg>`;
+
+/* =================== LOGIN =================== */
+function tampilLogin() {
+  $('#app').innerHTML = `<div class="login-wrap"><form class="login-kartu" onsubmit="login(event)">
+    <div class="logo-bulat">${ikon('buku', 28)}</div>
+    <h1>SILOGBOOK</h1>
+    <p class="sub">Logbook Kegiatan Harian<br>Prodi Pendidikan Profesi Dietisien · Jurusan Gizi Poltekkes Kemenkes Makassar</p>
+    <div class="fld"><label class="lbl">NIM / NIP</label><input class="inp" id="lgId" autocomplete="username" required></div>
+    <div class="fld"><label class="lbl">Password</label><input class="inp" id="lgPw" type="password" autocomplete="current-password" required></div>
+    <button class="btn utama-btn" style="width:100%;justify-content:center;padding:11px">Masuk</button>
+    <p class="redup kecil" style="margin:14px 0 0;text-align:center">Lupa password? Hubungi admin prodi.</p>
+  </form></div>`;
+}
+async function login(e) {
+  e.preventDefault();
+  const r = await jalan(() => api('login', { id: $('#lgId').value.trim(), password: $('#lgPw').value }), false);
+  S.token = r.token; S.user = r.user;
+  try { localStorage.setItem('lb_token', r.token); localStorage.setItem('lb_user', JSON.stringify(r.user)); } catch (e) {}
+  await masukApp();
+  if (r.pakaiDefault) { tampil('akun'); toast('Anda masih memakai password awal. Silakan ganti password.', true); }
+}
+function keluar(diam) {
+  if (!diam && S.token) api('logout').catch(() => {});
+  S.token = null; S.user = null; S.d = null;
+  try { localStorage.removeItem('lb_token'); localStorage.removeItem('lb_user'); } catch (e) {}
+  if (S.verif) return;
+  tampilLogin();
+}
+
+/* =================== SHELL =================== */
+const MENU = {
+  mahasiswa: [['beranda', 'Beranda', 'home'], ['isi', 'Isi Logbook', 'pena'], ['riwayat', 'Logbook Saya', 'daftar'], ['akun', 'Akun', 'akun']],
+  ci: [['antrean', 'Perlu Verifikasi', 'cek'], ['bimbingan', 'Mahasiswa Bimbingan', 'org'], ['akun', 'Akun', 'akun']],
+  admin: [['rekap', 'Rekap Pengisian', 'grafik'], ['harian', 'Cek Harian', 'kal'], ['penempatan', 'Penempatan', 'peta'], ['pengguna', 'Pengguna', 'org'], ['akun', 'Akun', 'akun']]
+};
+const PERAN = { mahasiswa: 'Mahasiswa', ci: 'Clinical Instructor', admin: 'Admin Prodi' };
+async function masukApp() {
+  $('#app').innerHTML = `<div class="shell">
+    <aside class="sidebar" id="sb"><div class="brand"><div class="ikon">${ikon('buku', 20)}</div><div><b>SILOGBOOK</b><small>Profesi Dietisien</small></div></div>
+      <nav class="menu" id="menu"></nav>
+      <div class="pengguna"><b>${esc(S.user.nama)}</b>${PERAN[S.user.peran]} · ${esc(S.user.id)}</div></aside>
+    <div class="tirai" id="tirai" onclick="sidebar(false)"></div>
+    <div class="utama"><header class="topbar"><button class="hamburger" onclick="sidebar(true)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h2 id="judul"></h2></header>
+    <main class="konten" id="konten"></main></div></div>`;
+  await muat();
+  tampil(MENU[S.user.peran][0][0]);
+}
+function sidebar(b) { $('#sb').classList.toggle('buka', b); $('#tirai').classList.toggle('buka', b); }
+function gambarMenu() {
+  const jml = {};
+  if (S.user.peran === 'ci' && S.d) jml.antrean = S.d.logbook.filter(l => l.status === 'diajukan').length;
+  if (S.user.peran === 'mahasiswa' && S.d) jml.riwayat = S.d.logbook.filter(l => l.status === 'dikembalikan').length;
+  $('#menu').innerHTML = MENU[S.user.peran].map(([k, t, i]) =>
+    `<button class="${S.menu === k ? 'aktif' : ''}" onclick="tampil('${k}')">${ikon(i)}<span>${t}</span>${jml[k] ? `<span class="jml">${jml[k]}</span>` : ''}</button>`).join('') +
+    `<button onclick="keluar()">${ikon('unduh')}<span>Keluar</span></button>`;
+}
+async function muat() {
+  const aksi = { mahasiswa: 'mhsData', ci: 'ciData', admin: 'adminData' }[S.user.peran];
+  loading(true);
+  try { S.d = await api(aksi); } catch (e) { toast(e.message, true); } finally { loading(false); }
+}
+function tampil(menu, arg) {
+  S.menu = menu; sidebar(false); gambarMenu();
+  const item = MENU[S.user.peran].find(m => m[0] === menu);
+  $('#judul').textContent = item ? item[1] : '';
+  const f = VIEW[menu]; $('#konten').innerHTML = ''; if (f && S.d) f(arg);
+  window.scrollTo(0, 0);
+}
+async function segarkan(menu, arg) { await muat(); tampil(menu || S.menu, arg); }
+const VIEW = {};
+
+/* =================== PRATINJAU LOGBOOK =================== */
+function htmlKertas(lb, mhs, pen) {
+  const lmk = pen.lokasi ? pen.lokasi + ' / ' + pen.mata_kuliah : pen.mata_kuliah;
+  let ttd = '';
+  if (lb.status === 'diverifikasi') {
+    const q = qrMatriks(dasarUrl() + '?v=' + lb.kode_verifikasi);
+    let svg = `<svg viewBox="0 0 ${q.n} ${q.n}" shape-rendering="crispEdges"><rect width="${q.n}" height="${q.n}" fill="#fff"/>`;
+    for (let r = 0; r < q.n; r++) for (let c = 0; c < q.n; c++) if (q.gelap(r, c)) svg += `<rect x="${c}" y="${r}" width="1" height="1"/>`;
+    ttd = `<div class="ttd">${INSTANSI.kota}, ${tglIndo(lb.tanggal)}<br>Pembimbing Lahan<br><span class="qr">${svg}</svg></span><br>${esc(lb.nama_ci || '')}<br>NIP. ${formatNip(lb.nip_ci)}</div>`;
+  } else {
+    ttd = `<div class="ttd">${INSTANSI.kota}, ${tglIndo(lb.tanggal)}<br>Pembimbing Lahan<br><span style="display:inline-block;margin:10px 0;color:#999;font-style:italic">(belum diverifikasi)</span></div>`;
+  }
+  return `<div class="kertas"><div class="judul">${INSTANSI.prodi}<br>${INSTANSI.jurusan}<br>${INSTANSI.judul}</div>
+    <table><tr><td style="width:50%">Nama Mahasiswa / NIM</td><td>: ${esc(mhs.nama)} / ${esc(mhs.nim)}</td></tr>
+    <tr><td>Lokasi / Mata Kuliah</td><td>: ${esc(lmk)}</td></tr><tr><td>Hari / Tanggal</td><td>: ${tglIndo(lb.tanggal, true)}</td></tr></table>
+    <table><tr><th style="width:5%">No</th><th style="width:13%">Jam</th><th style="width:28%">Rencana Kegiatan</th><th>Implementasi dan Evaluasi Kegiatan</th></tr>
+    ${lb.kegiatan.map((k, i) => `<tr><td>${i + 1}</td><td>${esc(k.jam)}</td><td>${esc(k.rencana).replace(/\n/g, '<br>')}</td><td>${esc(k.implementasi).replace(/\n/g, '<br>')}</td></tr>`).join('')}
+    </table>${ttd}</div>`;
+}
+function htmlRiwayat(lb) {
+  if (!lb.riwayat || !lb.riwayat.length) return '';
+  return `<h4 style="margin:16px 0 4px;font-size:14px">Riwayat</h4><div class="timeline">${lb.riwayat.map(r =>
+    `<div><b>${esc(r.aksi)}</b> · ${esc(r.oleh)} <span class="redup">(${esc(r.w)})</span>${r.catatan ? `<br><span style="color:var(--merah)">Catatan: ${esc(r.catatan)}</span>` : ''}</div>`).join('')}</div>`;
+}
+async function unduhPdf(penIds, ids, nama) {
+  loading(true);
+  try {
+    const daftar = [];
+    for (const pid of penIds) {
+      const r = await api('dataPdf', { penempatan_id: pid, ids: ids || null });
+      if (r.logbook.length) daftar.push(r);
+    }
+    if (!daftar.length) { toast('Belum ada logbook terverifikasi untuk diunduh', true); return; }
+    const bytes = await buatPdf(daftar, dasarUrl());
+    const n = nama || (daftar.length === 1 ? 'Logbook_' + namaFile(daftar[0].mhs.nama) + '_' + namaFile(daftar[0].penempatan.mata_kuliah) : 'Logbook_gabungan_' + daftar.length + '_mahasiswa');
+    unduhFile(bytes, n + '.pdf');
+    toast('PDF berhasil dibuat (' + daftar.reduce((a, d) => a + d.logbook.length, 0) + ' halaman logbook)');
+  } catch (e) { toast(e.message, true); }
+  finally { loading(false); }
+}
+
+/* =================== MAHASISWA =================== */
+const penMhs = id => S.d.penempatan.find(p => p.id === id);
+const mhsSaya = () => ({ nama: S.user.nama, nim: S.user.id });
+
+VIEW.beranda = () => {
+  const { penempatan: pen, logbook: lb } = S.d;
+  const kembali = lb.filter(l => l.status === 'dikembalikan');
+  let h = `<div class="alert biru">Selamat datang, <b>${esc(S.user.nama)}</b>. Isi logbook setiap hari praktik, lalu ajukan ke CI untuk diverifikasi.</div>`;
+  if (kembali.length) h += `<div class="alert merah"><b>${kembali.length} logbook dikembalikan CI</b> dan perlu diperbaiki.
+    <div style="margin-top:8px">${kembali.map(l => `<div style="margin-bottom:6px">• ${tglIndo(l.tanggal, true)} — <i>"${esc(l.catatan_ci)}"</i>
+    <button class="btn kcl" onclick="tampil('isi','${l.id}')">Perbaiki</button></div>`).join('')}</div></div>`;
+  if (!pen.length) return $('#konten').innerHTML = h + `<div class="kartu kosong">Anda belum memiliki penempatan praktik. Hubungi admin prodi.</div>`;
+  h += `<div class="grid g2">` + pen.map(p => {
+    const logs = lb.filter(l => l.penempatan_id === p.id);
+    const wajib = hariWajib(p);
+    const ada = new Set(logs.map(l => l.tanggal));
+    const belum = wajib.filter(t => !ada.has(t));
+    const ver = logs.filter(l => l.status === 'diverifikasi').length;
+    const pct = wajib.length ? Math.round(ver / wajib.length * 100) : 0;
+    return `<div class="kartu"><h3>${esc(p.mata_kuliah)}</h3>
+      <div class="redup kecil">${esc(p.lokasi || '-')} · CI: ${esc(p.nama_ci)}<br>${tglIndo(p.tgl_mulai)} – ${tglIndo(p.tgl_selesai)}</div>
+      <div class="grid g4" style="margin:14px 0;grid-template-columns:repeat(3,1fr);gap:8px">
+        <div><b style="font-size:20px">${logs.filter(l => l.status !== 'draft').length}</b><div class="redup kecil">Sudah diisi</div></div>
+        <div><b style="font-size:20px;color:var(--hijau)">${ver}</b><div class="redup kecil">Terverifikasi</div></div>
+        <div><b style="font-size:20px;color:var(--merah)">${belum.length}</b><div class="redup kecil">Belum diisi</div></div></div>
+      <div class="prog" title="${pct}% terverifikasi"><i style="width:${pct}%"></i></div>
+      ${belum.length ? `<p class="kecil" style="color:var(--merah);margin:10px 0 0">Belum diisi: ${belum.slice(-5).map(t => tglIndo(t)).join(', ')}${belum.length > 5 ? ' …' : ''}</p>` : ''}
+      <div class="baris-aksi" style="margin-top:14px"><button class="btn utama-btn kcl" onclick="isiBaru('${p.id}')">${ikon('pena', 15)} Isi logbook</button>
+      <button class="btn kcl" ${ver ? '' : 'disabled'} onclick="unduhPdf(['${p.id}'])">${ikon('unduh', 15)} Unduh PDF</button></div></div>`;
+  }).join('') + `</div>`;
+  $('#konten').innerHTML = h;
+};
+
+function isiBaru(pid) { S.form = null; tampil('isi', { penempatan_id: pid }); }
+
+VIEW.isi = (arg) => {
+  const pen = S.d.penempatan;
+  if (!pen.length) return $('#konten').innerHTML = `<div class="kartu kosong">Belum ada penempatan praktik.</div>`;
+  let f;
+  if (typeof arg === 'string') {
+    const l = S.d.logbook.find(x => x.id === arg);
+    f = { id: l.id, penempatan_id: l.penempatan_id, tanggal: l.tanggal, status: l.status, catatan_ci: l.catatan_ci, kegiatan: JSON.parse(JSON.stringify(l.kegiatan)) };
+  } else {
+    const aktif = pen.find(p => p.tgl_mulai <= hariIni() && hariIni() <= p.tgl_selesai) || pen[pen.length - 1];
+    const pid = (arg && arg.penempatan_id) || aktif.id;
+    const p = penMhs(pid);
+    const tgl = hariIni() < p.tgl_mulai ? p.tgl_mulai : hariIni() > p.tgl_selesai ? p.tgl_selesai : hariIni();
+    f = { penempatan_id: pid, tanggal: tgl, status: 'baru', kegiatan: [] };
+    const ada = S.d.logbook.find(l => l.penempatan_id === pid && l.tanggal === tgl);
+    if (ada) return VIEW.isi(ada.id);
+  }
+  if (!f.kegiatan.length) f.kegiatan = [{ mulai: '07:30', selesai: '08:00', rencana: '', implementasi: '' }];
+  f.kegiatan.forEach(k => { if (!k.mulai && k.jam) { const m = k.jam.split(/[–-]/); k.mulai = (m[0] || '').trim().replace('.', ':'); k.selesai = (m[1] || '').trim().replace('.', ':'); } });
+  S.form = f;
+  gambarForm();
+};
+function gambarForm() {
+  const f = S.form, p = penMhs(f.penempatan_id);
+  const terkunci = f.status === 'diajukan' || f.status === 'diverifikasi';
+  let h = '';
+  if (f.status === 'dikembalikan') h += `<div class="alert merah"><b>Dikembalikan CI untuk diperbaiki.</b><br>Catatan: ${esc(f.catatan_ci)}</div>`;
+  if (f.status === 'diajukan') h += `<div class="alert kuning">Logbook ini sedang menunggu verifikasi CI dan tidak bisa diubah.</div>`;
+  if (f.status === 'diverifikasi') h += `<div class="alert hijau">Logbook ini sudah diverifikasi CI.</div>`;
+  h += `<div class="kartu"><div class="grid g2" style="gap:12px">
+    <div class="fld" style="margin:0"><label class="lbl">Lokasi / Mata Kuliah</label>
+      <select class="inp" id="fPen" onchange="gantiPen(this.value)" ${f.id ? 'disabled' : ''}>${S.d.penempatan.map(x =>
+        `<option value="${x.id}" ${x.id === f.penempatan_id ? 'selected' : ''}>${esc(x.mata_kuliah)}${x.lokasi ? ' — ' + esc(x.lokasi) : ''}</option>`).join('')}</select></div>
+    <div class="fld" style="margin:0"><label class="lbl">Hari / Tanggal</label>
+      <input class="inp" type="date" id="fTgl" value="${f.tanggal}" min="${p.tgl_mulai}" max="${p.tgl_selesai}" onchange="gantiTgl(this.value)" ${terkunci ? 'disabled' : ''}>
+      <div class="kecil redup" style="margin-top:4px">${tglIndo(f.tanggal, true)} · CI: ${esc(p.nama_ci)}</div></div></div></div>
+  <div class="kartu"><div class="baris-aksi" style="justify-content:space-between;margin-bottom:12px"><h3>Kegiatan</h3>
+    ${terkunci ? '' : `<button class="btn kcl" onclick="salinKemarin()">Salin jam & rencana dari logbook sebelumnya</button>`}</div>
+    <div id="dafKeg">${f.kegiatan.map((k, i) => `<div class="keg"><div class="keg-head"><span class="keg-no">${i + 1}</span>
+      <div class="jam"><input class="inp" type="time" value="${k.mulai || ''}" onchange="S.form.kegiatan[${i}].mulai=this.value" ${terkunci ? 'disabled' : ''}><span>–</span>
+      <input class="inp" type="time" value="${k.selesai || ''}" onchange="S.form.kegiatan[${i}].selesai=this.value" ${terkunci ? 'disabled' : ''}></div>
+      ${terkunci || f.kegiatan.length < 2 ? '' : `<button class="btn bahaya kcl" style="margin-left:auto" onclick="hapusKeg(${i})">Hapus</button>`}</div>
+      <div class="fld"><label class="lbl">Rencana Kegiatan</label><textarea class="inp" style="min-height:52px" oninput="S.form.kegiatan[${i}].rencana=this.value" ${terkunci ? 'disabled' : ''}>${esc(k.rencana)}</textarea></div>
+      <div class="fld" style="margin:0"><label class="lbl">Implementasi dan Evaluasi Kegiatan</label><textarea class="inp" oninput="S.form.kegiatan[${i}].implementasi=this.value" ${terkunci ? 'disabled' : ''}>${esc(k.implementasi)}</textarea></div></div>`).join('')}</div>
+    ${terkunci ? '' : `<button class="btn kcl" onclick="tambahKeg()">+ Tambah kegiatan</button>`}</div>
+  ${terkunci ? '' : `<div class="baris-aksi" style="justify-content:flex-end"><button class="btn" onclick="pratinjauForm()">Pratinjau</button>
+    <button class="btn" onclick="simpanForm(false)">Simpan draft</button>
+    <button class="btn utama-btn" onclick="simpanForm(true)">${ikon('cek', 16)} ${f.status === 'dikembalikan' ? 'Ajukan ulang ke CI' : 'Ajukan ke CI'}</button></div>`}`;
+  $('#konten').innerHTML = h;
+}
+function gantiPen(pid) { tampil('isi', { penempatan_id: pid }); }
+function gantiTgl(t) {
+  const ada = S.d.logbook.find(l => l.penempatan_id === S.form.penempatan_id && l.tanggal === t && l.id !== S.form.id);
+  if (ada) { toast('Logbook tanggal ini sudah ada, dibuka untuk Anda'); return VIEW.isi(ada.id); }
+  if (new Date(t + 'T00:00:00Z').getUTCDay() === 0) toast('Catatan: tanggal yang dipilih hari Minggu');
+  S.form.tanggal = t; gambarForm();
+}
+function tambahKeg() { const ks = S.form.kegiatan, akhir = ks[ks.length - 1]; ks.push({ mulai: akhir ? akhir.selesai : '', selesai: '', rencana: '', implementasi: '' }); gambarForm(); }
+function hapusKeg(i) { S.form.kegiatan.splice(i, 1); gambarForm(); }
+function salinKemarin() {
+  const sebelum = S.d.logbook.filter(l => l.penempatan_id === S.form.penempatan_id && l.tanggal < S.form.tanggal && l.kegiatan.length).sort((a, b) => a.tanggal < b.tanggal ? 1 : -1)[0];
+  if (!sebelum) return toast('Tidak ada logbook sebelumnya untuk disalin', true);
+  S.form.kegiatan = sebelum.kegiatan.map(k => { const m = (k.jam || '').split(/[–-]/); return { mulai: (m[0] || '').trim().replace('.', ':'), selesai: (m[1] || '').trim().replace('.', ':'), rencana: k.rencana, implementasi: '' }; });
+  gambarForm(); toast('Disalin dari ' + tglIndo(sebelum.tanggal) + '. Lengkapi implementasinya.');
+}
+function kegiatanBersih() {
+  return S.form.kegiatan.map(k => ({
+    mulai: k.mulai, selesai: k.selesai,
+    jam: k.mulai && k.selesai ? k.mulai.replace(':', '.') + '–' + k.selesai.replace(':', '.') : '',
+    rencana: (k.rencana || '').trim(), implementasi: (k.implementasi || '').trim()
+  }));
+}
+function pratinjauForm() {
+  const p = penMhs(S.form.penempatan_id);
+  modal('Pratinjau Lembar Kegiatan Harian', htmlKertas({ tanggal: S.form.tanggal, kegiatan: kegiatanBersih(), status: 'draft' }, mhsSaya(), p));
+}
+async function simpanForm(ajukan) {
+  const keg = kegiatanBersih();
+  if (ajukan) {
+    for (let i = 0; i < keg.length; i++) {
+      const k = keg[i];
+      if (!k.jam || !k.rencana || !k.implementasi) return toast('Kegiatan no. ' + (i + 1) + ' belum lengkap (jam, rencana, implementasi)', true);
+      if (k.selesai <= k.mulai) return toast('Jam selesai kegiatan no. ' + (i + 1) + ' harus setelah jam mulai', true);
+    }
+    if (!confirm('Ajukan logbook ' + tglIndo(S.form.tanggal, true) + ' ke CI? Setelah diajukan, logbook tidak bisa diubah kecuali dikembalikan CI.')) return;
+  }
+  const r = await jalan(() => api('simpanLogbook', { id: S.form.id, penempatan_id: S.form.penempatan_id, tanggal: S.form.tanggal, kegiatan: keg, ajukan }));
+  await muat();
+  if (ajukan) tampil('riwayat'); else VIEW.isi(r.id);
+}
+
+VIEW.riwayat = () => {
+  const { penempatan: pen, logbook: lb } = S.d;
+  if (!pen.length) return $('#konten').innerHTML = `<div class="kartu kosong">Belum ada penempatan.</div>`;
+  $('#konten').innerHTML = pen.map(p => {
+    const logs = lb.filter(l => l.penempatan_id === p.id).sort((a, b) => a.tanggal < b.tanggal ? 1 : -1);
+    return `<div class="kartu"><div class="baris-aksi" style="justify-content:space-between"><div><h3>${esc(p.mata_kuliah)}</h3><div class="redup kecil">${esc(p.lokasi || '')} · CI: ${esc(p.nama_ci)}</div></div>
+      <button class="btn kcl" onclick="unduhPdf(['${p.id}'])">${ikon('unduh', 15)} Unduh PDF terverifikasi</button></div>
+      ${logs.length ? logs.map(l => `<div class="item"><div class="isi"><b>${tglIndo(l.tanggal, true)}</b> ${badge(l.status)}
+        <div class="redup kecil">${l.kegiatan.length} kegiatan${l.status === 'dikembalikan' ? ` · <span style="color:var(--merah)">Catatan CI: ${esc(l.catatan_ci)}</span>` : ''}</div></div>
+        <div class="baris-aksi"><button class="btn kcl" onclick="lihatMhs('${l.id}')">Lihat</button>
+        ${l.status === 'draft' || l.status === 'dikembalikan' ? `<button class="btn kcl utama-btn" onclick="tampil('isi','${l.id}')">${l.status === 'draft' ? 'Lanjutkan' : 'Perbaiki'}</button>` : ''}
+        ${l.status === 'draft' ? `<button class="btn kcl bahaya" onclick="hapusDraft('${l.id}')">Hapus</button>` : ''}
+        ${l.status === 'diverifikasi' ? `<button class="btn kcl" onclick="unduhPdf(['${p.id}'],['${l.id}'],'Logbook_${l.tanggal}')">PDF</button>` : ''}</div></div>`).join('')
+      : '<div class="kosong">Belum ada logbook.</div>'}</div>`;
+  }).join('');
+};
+function lihatMhs(id) {
+  const l = S.d.logbook.find(x => x.id === id), p = penMhs(l.penempatan_id);
+  modal('Logbook ' + tglIndo(l.tanggal, true), htmlKertas(Object.assign({ nama_ci: p.nama_ci }, l), mhsSaya(), p) + htmlRiwayat(l));
+}
+async function hapusDraft(id) {
+  if (!confirm('Hapus draft ini?')) return;
+  await jalan(() => api('hapusLogbook', { id }));
+  segarkan();
+}
+
+/* =================== CI =================== */
+const penCi = id => S.d.penempatan.find(p => p.id === id);
+const mhsDariPen = p => ({ nama: p.nama_mhs, nim: p.nim });
+
+VIEW.antrean = () => {
+  const ant = S.d.logbook.filter(l => l.status === 'diajukan').sort((a, b) => a.tanggal < b.tanggal ? -1 : 1);
+  if (!ant.length) return $('#konten').innerHTML = `<div class="kartu kosong">${ikon('cek', 34)}<p>Tidak ada logbook yang menunggu verifikasi.</p></div>`;
+  $('#konten').innerHTML = `<div class="alert biru">Periksa isi logbook. Pilih <b>Verifikasi</b> untuk membubuhkan tanda tangan QR, atau <b>Kembalikan</b> disertai catatan bila perlu diperbaiki.</div>
+  <div class="kartu"><div class="baris-aksi" style="justify-content:space-between;margin-bottom:6px">
+    <label class="baris-aksi"><input type="checkbox" onchange="document.querySelectorAll('.pilihAnt').forEach(c=>c.checked=this.checked)"> Pilih semua</label>
+    <button class="btn utama-btn kcl" onclick="verifTerpilih()">${ikon('cek', 15)} Verifikasi terpilih</button></div>
+  ${ant.map(l => { const p = penCi(l.penempatan_id); return `<div class="item"><input type="checkbox" class="pilihAnt" value="${l.id}" style="margin-top:5px">
+    <div class="isi"><b>${esc(p.nama_mhs)}</b> <span class="redup kecil">${esc(p.nim)}</span><div class="kecil">${tglIndo(l.tanggal, true)} · ${esc(p.mata_kuliah)} · ${l.kegiatan.length} kegiatan</div></div>
+    <button class="btn kcl navy" onclick="periksaCi('${l.id}')">Periksa</button></div>`; }).join('')}</div>`;
+};
+function periksaCi(id) {
+  const l = S.d.logbook.find(x => x.id === id), p = penCi(l.penempatan_id);
+  const bisa = l.status === 'diajukan';
+  modal(esc(p.nama_mhs) + ' — ' + tglIndo(l.tanggal, true),
+    htmlKertas(Object.assign({ nama_ci: S.user.nama }, l), mhsDariPen(p), p) + htmlRiwayat(l) +
+    (bisa ? `<div class="fld" style="margin-top:16px"><label class="lbl">Catatan perbaikan (wajib bila dikembalikan)</label><textarea class="inp" id="catCi" placeholder="Contoh: Lengkapi evaluasi kegiatan no. 3 dengan hasil skrining."></textarea></div>` : ''),
+    bisa ? `<button class="btn bahaya" onclick="kembalikanCi('${id}')">Kembalikan ke mahasiswa</button><button class="btn utama-btn" onclick="verifCi(['${id}'])">${ikon('cek', 16)} Verifikasi & tanda tangani</button>`
+      : (l.status === 'diverifikasi' ? `<button class="btn" onclick="unduhPdf(['${p.id}'],['${id}'],'Logbook_${esc(p.nim)}_${l.tanggal}')">${ikon('unduh', 15)} Unduh PDF</button>` : ''));
+}
+async function verifCi(ids) {
+  if (!confirm('Verifikasi ' + ids.length + ' logbook? Tanda tangan QR atas nama Anda akan dibubuhkan.')) return;
+  await jalan(() => api('verifikasi', { ids }));
+  tutupModal(); segarkan('antrean');
+}
+function verifTerpilih() {
+  const ids = [...document.querySelectorAll('.pilihAnt:checked')].map(c => c.value);
+  if (!ids.length) return toast('Pilih minimal satu logbook', true);
+  verifCi(ids);
+}
+async function kembalikanCi(id) {
+  const c = $('#catCi').value.trim();
+  if (!c) { toast('Tuliskan catatan perbaikan terlebih dahulu', true); $('#catCi').focus(); return; }
+  await jalan(() => api('kembalikan', { id, catatan: c }));
+  tutupModal(); segarkan('antrean');
+}
+VIEW.bimbingan = (pid) => {
+  const pen = S.d.penempatan;
+  if (!pen.length) return $('#konten').innerHTML = `<div class="kartu kosong">Belum ada mahasiswa bimbingan.</div>`;
+  if (pid) {
+    const p = penCi(pid);
+    const logs = S.d.logbook.filter(l => l.penempatan_id === pid);
+    const peta = {}; logs.forEach(l => peta[l.tanggal] = l);
+    const tgl = [...new Set([...hariWajib(p), ...logs.map(l => l.tanggal)])].sort().reverse();
+    $('#konten').innerHTML = `<button class="btn kcl" onclick="tampil('bimbingan')" style="margin-bottom:12px">← Kembali</button>
+      <div class="kartu"><div class="baris-aksi" style="justify-content:space-between"><div><h3>${esc(p.nama_mhs)} <span class="redup kecil">${esc(p.nim)}</span></h3>
+      <div class="redup kecil">${esc(p.mata_kuliah)} · ${tglIndo(p.tgl_mulai)} – ${tglIndo(p.tgl_selesai)}</div></div>
+      <button class="btn kcl" onclick="unduhPdf(['${p.id}'])">${ikon('unduh', 15)} Unduh PDF</button></div>
+      ${tgl.map(t => { const l = peta[t]; return `<div class="item"><div class="isi"><b>${tglIndo(t, true)}</b> ${badge(l ? l.status : 'belum')}</div>
+        ${l ? `<button class="btn kcl" onclick="periksaCi('${l.id}')">${l.status === 'diajukan' ? 'Periksa' : 'Lihat'}</button>` : ''}</div>`; }).join('') || '<div class="kosong">Belum ada data.</div>'}</div>`;
+    return;
+  }
+  $('#konten').innerHTML = `<div class="tabel-wrap"><table class="tb"><tr><th>Mahasiswa</th><th>Mata Kuliah</th><th>Periode</th><th>Menunggu</th><th>Terverifikasi</th><th></th></tr>
+    ${pen.map(p => { const logs = S.d.logbook.filter(l => l.penempatan_id === p.id); const w = hariWajib(p).length; const v = logs.filter(l => l.status === 'diverifikasi').length;
+      return `<tr><td><b>${esc(p.nama_mhs)}</b><div class="redup kecil">${esc(p.nim)}</div></td><td>${esc(p.mata_kuliah)}<div class="redup kecil">${esc(p.lokasi)}</div></td>
+      <td class="kecil">${tglIndo(p.tgl_mulai)} –<br>${tglIndo(p.tgl_selesai)}</td><td>${logs.filter(l => l.status === 'diajukan').length}</td>
+      <td>${v} / ${w}<div class="prog"><i style="width:${w ? Math.round(v / w * 100) : 0}%"></i></div></td>
+      <td><button class="btn kcl" onclick="tampil('bimbingan','${p.id}')">Buka</button></td></tr>`; }).join('')}</table></div>`;
+};
+
+/* =================== ADMIN =================== */
+const um = () => { const m = {}; S.d.users.forEach(u => m[u.id] = u); return m; };
+function barisRekap() {
+  const U = um();
+  return S.d.penempatan.map(p => {
+    const logs = S.d.logbook.filter(l => l.penempatan_id === p.id);
+    const wajib = hariWajib(p);
+    const cnt = s => logs.filter(l => l.status === s).length;
+    const ada = new Set(logs.filter(l => l.status !== 'draft').map(l => l.tanggal));
+    return { p, nama: (U[p.nim] || {}).nama || p.nim, ci: (U[p.nip_ci] || {}).nama || p.nip_ci, wajib: wajib.length,
+      terisi: ada.size, ver: cnt('diverifikasi'), aju: cnt('diajukan'), kembali: cnt('dikembalikan'),
+      belum: wajib.filter(t => !ada.has(t)).length };
+  });
+}
+VIEW.rekap = () => {
+  const rows = barisRekap();
+  const mk = [...new Set(S.d.penempatan.map(p => p.mata_kuliah))].sort();
+  const tot = rows.reduce((a, r) => (a.w += r.wajib, a.t += r.terisi, a.v += r.ver, a.b += r.belum ? 1 : 0, a), { w: 0, t: 0, v: 0, b: 0 });
+  $('#konten').innerHTML = `<div class="grid g4" style="margin-bottom:16px">
+    <div class="stat"><b>${rows.length}</b><span>Penempatan mahasiswa</span></div>
+    <div class="stat" style="border-color:var(--navy)"><b>${tot.t}</b><span>Hari logbook diajukan</span></div>
+    <div class="stat"><b>${tot.v}</b><span>Hari terverifikasi</span></div>
+    <div class="stat" style="border-color:var(--merah)"><b>${tot.b}</b><span>Mahasiswa punya tunggakan</span></div></div>
+  <div class="kartu"><div class="baris-aksi" style="margin-bottom:12px">
+    <select class="inp cari" id="fMk" onchange="filterRekap()"><option value="">Semua mata kuliah</option>${mk.map(m => `<option>${esc(m)}</option>`).join('')}</select>
+    <select class="inp cari" id="fSt" onchange="filterRekap()" style="max-width:200px"><option value="">Semua status</option><option value="belum">Ada yang belum diisi</option><option value="lengkap">Sudah lengkap</option></select>
+    <input class="inp cari" id="fCari" placeholder="Cari nama/NIM…" oninput="filterRekap()">
+    <span style="flex:1"></span>
+    <button class="btn kcl" onclick="csvRekap()">Unduh rekap (CSV)</button>
+    <button class="btn kcl utama-btn" onclick="pdfTerpilih()">${ikon('unduh', 15)} PDF terpilih</button></div>
+    <div class="redup kecil" style="margin-bottom:8px">Hari wajib dihitung dari tanggal mulai sampai hari ini (atau tanggal selesai), tidak termasuk hari Minggu.</div>
+    <div class="tabel-wrap"><table class="tb" id="tbRekap"></table></div></div>`;
+  filterRekap();
+};
+function filterRekap() {
+  const mk = $('#fMk').value, st = $('#fSt').value, q = $('#fCari').value.toLowerCase();
+  const rows = barisRekap().filter(r => (!mk || r.p.mata_kuliah === mk) && (!q || (r.nama + ' ' + r.p.nim).toLowerCase().includes(q))
+    && (!st || (st === 'belum' ? r.belum > 0 : r.belum === 0)));
+  $('#tbRekap').innerHTML = `<tr><th><input type="checkbox" onchange="document.querySelectorAll('.pilihRk').forEach(c=>c.checked=this.checked)"></th><th>Mahasiswa</th><th>Mata Kuliah / CI</th>
+    <th>Hari wajib</th><th>Diajukan</th><th>Terverifikasi</th><th>Belum diisi</th><th></th></tr>` +
+    (rows.map(r => `<tr><td><input type="checkbox" class="pilihRk" value="${r.p.id}"></td><td><b>${esc(r.nama)}</b><div class="redup kecil">${esc(r.p.nim)}</div></td>
+      <td>${esc(r.p.mata_kuliah)}<div class="redup kecil">${esc(r.p.lokasi)}${r.p.lokasi ? ' · ' : ''}CI: ${esc(r.ci)}</div></td>
+      <td>${r.wajib}</td><td>${r.terisi}${r.aju ? `<div class="kecil" style="color:var(--kuning)">${r.aju} menunggu</div>` : ''}${r.kembali ? `<div class="kecil" style="color:var(--merah)">${r.kembali} dikembalikan</div>` : ''}</td>
+      <td>${r.ver}<div class="prog"><i style="width:${r.wajib ? Math.min(100, Math.round(r.ver / r.wajib * 100)) : 0}%"></i></div></td>
+      <td>${r.belum ? `<span class="badge st-dikembalikan">${r.belum} hari</span>` : '<span class="badge st-diverifikasi">Lengkap</span>'}</td>
+      <td><div class="baris-aksi"><button class="btn kcl" onclick="detailAdmin('${r.p.id}')">Detail</button><button class="btn kcl" ${r.ver ? '' : 'disabled'} onclick="unduhPdf(['${r.p.id}'])">PDF</button></div></td></tr>`).join('')
+      || `<tr><td colspan="8" class="kosong">Tidak ada data.</td></tr>`);
+}
+function pdfTerpilih() {
+  const ids = [...document.querySelectorAll('.pilihRk:checked')].map(c => c.value);
+  if (!ids.length) return toast('Centang mahasiswa yang akan diunduh', true);
+  unduhPdf(ids);
+}
+function csvRekap() {
+  const r = barisRekap();
+  const isi = [['NIM', 'Nama', 'Mata Kuliah', 'Lokasi', 'CI', 'Mulai', 'Selesai', 'Hari wajib', 'Diajukan', 'Terverifikasi', 'Menunggu', 'Dikembalikan', 'Belum diisi']]
+    .concat(r.map(x => [x.p.nim, x.nama, x.p.mata_kuliah, x.p.lokasi, x.ci, x.p.tgl_mulai, x.p.tgl_selesai, x.wajib, x.terisi, x.ver, x.aju, x.kembali, x.belum]))
+    .map(b => b.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+  unduhFile('﻿' + isi, 'Rekap_logbook_' + hariIni() + '.csv', 'text/csv');
+}
+function detailAdmin(pid) {
+  const p = S.d.penempatan.find(x => x.id === pid), U = um();
+  const logs = S.d.logbook.filter(l => l.penempatan_id === pid);
+  const peta = {}; logs.forEach(l => peta[l.tanggal] = l);
+  const tgl = [...new Set([...hariWajib(p), ...logs.map(l => l.tanggal)])].sort();
+  modal(esc((U[p.nim] || {}).nama || p.nim) + ' — ' + esc(p.mata_kuliah),
+    `<p class="redup kecil" style="margin-top:0">CI: ${esc((U[p.nip_ci] || {}).nama || p.nip_ci)} · ${tglIndo(p.tgl_mulai)} – ${tglIndo(p.tgl_selesai)}</p>
+    <div class="tabel-wrap"><table class="tb"><tr><th>Tanggal</th><th>Status</th><th></th></tr>${tgl.map(t => { const l = peta[t];
+      return `<tr><td>${tglIndo(t, true)}</td><td>${badge(l ? l.status : 'belum')}</td><td>${l && l.status === 'diverifikasi' ? `<div class="baris-aksi">
+        <button class="btn kcl" onclick="unduhPdf(['${pid}'],['${l.id}'],'Logbook_${esc(p.nim)}_${t}')">PDF</button>
+        <button class="btn kcl bahaya" onclick="batalVerif('${l.id}','${pid}')">Batalkan verifikasi</button></div>` : ''}</td></tr>`; }).join('')}</table></div>`,
+    `<button class="btn utama-btn" onclick="unduhPdf(['${pid}'])">${ikon('unduh', 15)} Unduh semua (PDF)</button>`);
+}
+async function batalVerif(id, pid) {
+  if (!confirm('Batalkan verifikasi? Logbook kembali ke antrean CI dan QR lama tidak berlaku lagi.')) return;
+  await jalan(() => api('bukaKunci', { id }));
+  await muat(); detailAdmin(pid);
+}
+VIEW.harian = (tgl) => {
+  tgl = tgl || hariIni();
+  const U = um();
+  const aktif = S.d.penempatan.filter(p => p.tgl_mulai <= tgl && tgl <= p.tgl_selesai);
+  const rows = aktif.map(p => { const l = S.d.logbook.find(x => x.penempatan_id === p.id && x.tanggal === tgl); return { p, st: l ? l.status : 'belum' }; });
+  const sudah = rows.filter(r => r.st !== 'belum' && r.st !== 'draft').length;
+  const minggu = new Date(tgl + 'T00:00:00Z').getUTCDay() === 0;
+  rows.sort((a, b) => (a.st === 'belum' || a.st === 'draft' ? 0 : 1) - (b.st === 'belum' || b.st === 'draft' ? 0 : 1));
+  $('#konten').innerHTML = `<div class="kartu"><div class="baris-aksi"><label class="lbl" style="margin:0">Tanggal</label>
+    <input class="inp" type="date" value="${tgl}" style="max-width:190px" onchange="VIEW.harian(this.value)"><b>${tglIndo(tgl, true)}</b></div>
+    ${minggu ? '<div class="alert kuning" style="margin:12px 0 0">Hari Minggu — bukan hari wajib praktik.</div>' : ''}</div>
+  <div class="grid g4" style="margin-bottom:16px"><div class="stat"><b>${aktif.length}</b><span>Mahasiswa praktik</span></div>
+    <div class="stat"><b>${sudah}</b><span>Sudah mengisi & mengajukan</span></div>
+    <div class="stat" style="border-color:var(--merah)"><b>${aktif.length - sudah}</b><span>Belum mengisi / masih draft</span></div></div>
+  <div class="tabel-wrap"><table class="tb"><tr><th>Mahasiswa</th><th>Mata Kuliah</th><th>CI</th><th>Status</th></tr>
+  ${rows.map(r => `<tr><td><b>${esc((U[r.p.nim] || {}).nama || r.p.nim)}</b><div class="redup kecil">${esc(r.p.nim)}</div></td><td>${esc(r.p.mata_kuliah)}</td>
+    <td>${esc((U[r.p.nip_ci] || {}).nama || r.p.nip_ci)}</td><td>${badge(r.st)}</td></tr>`).join('') || '<tr><td colspan="4" class="kosong">Tidak ada mahasiswa praktik pada tanggal ini.</td></tr>'}</table></div>`;
+};
+VIEW.penempatan = () => {
+  const U = um();
+  const mhs = S.d.users.filter(u => u.peran === 'mahasiswa' && u.aktif === 'ya');
+  const ci = S.d.users.filter(u => u.peran === 'ci' && u.aktif === 'ya');
+  const mk = [...new Set(S.d.penempatan.map(p => p.mata_kuliah))];
+  const lok = [...new Set(S.d.penempatan.map(p => p.lokasi).filter(Boolean))];
+  $('#konten').innerHTML = `<div class="kartu"><h3>Tambah penempatan</h3><p class="redup kecil" style="margin-top:0">Satu CI dapat membimbing beberapa mahasiswa sekaligus — centang semua mahasiswanya.</p>
+    <div class="grid g2"><div><label class="lbl">Mahasiswa</label><input class="inp" placeholder="Cari…" style="margin-bottom:6px" oninput="document.querySelectorAll('#dMhs label').forEach(l=>l.style.display=l.textContent.toLowerCase().includes(this.value.toLowerCase())?'':'none')">
+      <div class="chip-list" id="dMhs">${mhs.map(u => `<label><input type="checkbox" value="${esc(u.id)}"> ${esc(u.nama)} <span class="redup">${esc(u.id)}</span></label>`).join('') || '<div class="kosong">Belum ada akun mahasiswa.</div>'}</div></div>
+    <div><div class="fld"><label class="lbl">Clinical Instructor</label><select class="inp" id="pCi"><option value="">— pilih CI —</option>${ci.map(u => `<option value="${esc(u.id)}">${esc(u.nama)}</option>`).join('')}</select></div>
+      <div class="fld"><label class="lbl">Mata Kuliah</label><input class="inp" id="pMk" list="lMk" placeholder="mis. Asuhan Gizi Penyakit Kegawatdaruratan Dewasa"><datalist id="lMk">${mk.map(m => `<option value="${esc(m)}">`).join('')}</datalist></div>
+      <div class="fld"><label class="lbl">Lokasi (opsional)</label><input class="inp" id="pLok" list="lLok" placeholder="mis. RSUP Dr. Wahidin Sudirohusodo"><datalist id="lLok">${lok.map(m => `<option value="${esc(m)}">`).join('')}</datalist></div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px"><div class="fld"><label class="lbl">Mulai</label><input class="inp" type="date" id="pMulai"></div>
+      <div class="fld"><label class="lbl">Selesai</label><input class="inp" type="date" id="pSelesai"></div></div>
+      <button class="btn utama-btn" onclick="tambahPen()">Simpan penempatan</button></div></div></div>
+  <div class="tabel-wrap"><table class="tb"><tr><th>Mahasiswa</th><th>Mata Kuliah / Lokasi</th><th>CI</th><th>Periode</th><th></th></tr>
+  ${S.d.penempatan.slice().reverse().map(p => `<tr><td><b>${esc((U[p.nim] || {}).nama || p.nim)}</b><div class="redup kecil">${esc(p.nim)}</div></td>
+    <td>${esc(p.mata_kuliah)}<div class="redup kecil">${esc(p.lokasi)}</div></td><td>${esc((U[p.nip_ci] || {}).nama || p.nip_ci)}</td>
+    <td class="kecil">${tglIndo(p.tgl_mulai)} – ${tglIndo(p.tgl_selesai)}</td>
+    <td><div class="baris-aksi"><button class="btn kcl" onclick="editPen('${p.id}')">Ubah</button><button class="btn kcl bahaya" onclick="hapusPen('${p.id}')">Hapus</button></div></td></tr>`).join('') || '<tr><td colspan="5" class="kosong">Belum ada penempatan.</td></tr>'}</table></div>`;
+};
+async function tambahPen() {
+  const nims = [...document.querySelectorAll('#dMhs input:checked')].map(c => c.value);
+  const d = { nims, nip_ci: $('#pCi').value, mata_kuliah: $('#pMk').value.trim(), lokasi: $('#pLok').value.trim(), tgl_mulai: $('#pMulai').value, tgl_selesai: $('#pSelesai').value };
+  if (!nims.length || !d.nip_ci || !d.mata_kuliah || !d.tgl_mulai || !d.tgl_selesai) return toast('Lengkapi mahasiswa, CI, mata kuliah, dan tanggal', true);
+  await jalan(() => api('simpanPenempatan', d));
+  segarkan('penempatan');
+}
+function editPen(id) {
+  const p = S.d.penempatan.find(x => x.id === id), U = um();
+  const ci = S.d.users.filter(u => u.peran === 'ci');
+  modal('Ubah penempatan — ' + esc((U[p.nim] || {}).nama || p.nim), `
+    <div class="fld"><label class="lbl">Clinical Instructor</label><select class="inp" id="eCi">${ci.map(u => `<option value="${esc(u.id)}" ${u.id === p.nip_ci ? 'selected' : ''}>${esc(u.nama)}</option>`).join('')}</select>
+      <div class="redup kecil" style="margin-top:4px">Logbook yang belum diverifikasi ikut dipindah ke CI baru.</div></div>
+    <div class="fld"><label class="lbl">Mata Kuliah</label><input class="inp" id="eMk" value="${esc(p.mata_kuliah)}"></div>
+    <div class="fld"><label class="lbl">Lokasi</label><input class="inp" id="eLok" value="${esc(p.lokasi)}"></div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px"><div class="fld"><label class="lbl">Mulai</label><input class="inp" type="date" id="eMulai" value="${p.tgl_mulai}"></div>
+    <div class="fld"><label class="lbl">Selesai</label><input class="inp" type="date" id="eSelesai" value="${p.tgl_selesai}"></div></div>`,
+    `<button class="btn" onclick="tutupModal()">Batal</button><button class="btn utama-btn" onclick="simpanEditPen('${id}')">Simpan</button>`, true);
+}
+async function simpanEditPen(id) {
+  const p = S.d.penempatan.find(x => x.id === id);
+  await jalan(() => api('simpanPenempatan', { id, nim: p.nim, nip_ci: $('#eCi').value, mata_kuliah: $('#eMk').value.trim(), lokasi: $('#eLok').value.trim(), tgl_mulai: $('#eMulai').value, tgl_selesai: $('#eSelesai').value }));
+  tutupModal(); segarkan('penempatan');
+}
+async function hapusPen(id) {
+  if (!confirm('Hapus penempatan ini?')) return;
+  await jalan(() => api('hapusPenempatan', { id }));
+  segarkan('penempatan');
+}
+VIEW.pengguna = (peran) => {
+  peran = peran || '';
+  const daftar = S.d.users.filter(u => !peran || u.peran === peran);
+  $('#konten').innerHTML = `<div class="grid g2">
+  <div class="kartu"><h3>Tambah pengguna</h3>
+    <div class="fld"><label class="lbl">NIM / NIP (dipakai untuk login)</label><input class="inp" id="uId"></div>
+    <div class="fld"><label class="lbl">Nama lengkap (untuk CI, sertakan gelar seperti di tanda tangan)</label><input class="inp" id="uNama" placeholder="mis. Asriaty. S.Gz.,Dietisien, CCNCP"></div>
+    <div class="fld"><label class="lbl">Peran</label><select class="inp" id="uPeran"><option value="mahasiswa">Mahasiswa</option><option value="ci">Clinical Instructor (CI)</option><option value="admin">Admin Prodi</option></select></div>
+    <div class="fld"><label class="lbl">Password awal (kosongkan = sama dengan NIM/NIP)</label><input class="inp" id="uPw"></div>
+    <button class="btn utama-btn" onclick="tambahUser()">Simpan</button></div>
+  <div class="kartu"><h3>Impor banyak sekaligus</h3><p class="redup kecil" style="margin-top:0">Satu baris per orang: <code>NIM/NIP ; Nama ; peran</code> — peran: mahasiswa / ci / admin. Bisa ditempel langsung dari Excel (kolom dipisah tab). Password awal = NIM/NIP.</p>
+    <textarea class="inp" id="uImpor" style="min-height:150px" placeholder="PO715231261020 ; Ihsan ; mahasiswa&#10;197304261998032001 ; Asriaty. S.Gz.,Dietisien, CCNCP ; ci"></textarea>
+    <button class="btn navy" style="margin-top:10px" onclick="imporUser()">Impor</button></div></div>
+  <div class="kartu"><div class="baris-aksi" style="margin-bottom:10px">${['', 'mahasiswa', 'ci', 'admin'].map(x => `<button class="btn kcl ${x === peran ? 'utama-btn' : ''}" onclick="VIEW.pengguna('${x}')">${x ? PERAN[x] : 'Semua'} (${S.d.users.filter(u => !x || u.peran === x).length})</button>`).join('')}</div>
+  <div class="tabel-wrap"><table class="tb"><tr><th>NIM/NIP</th><th>Nama</th><th>Peran</th><th>Status</th><th></th></tr>
+  ${daftar.map(u => `<tr><td>${esc(u.id)}</td><td>${esc(u.nama)}</td><td>${PERAN[u.peran]}</td><td>${u.aktif === 'ya' ? 'Aktif' : '<span class="redup">Nonaktif</span>'}</td>
+    <td><div class="baris-aksi"><button class="btn kcl" onclick="editUser('${esc(u.id)}')">Ubah</button><button class="btn kcl" onclick="resetPw('${esc(u.id)}')">Reset password</button>
+    ${u.id === S.user.id ? '' : `<button class="btn kcl bahaya" onclick="hapusUser('${esc(u.id)}')">Hapus</button>`}</div></td></tr>`).join('')}</table></div></div>`;
+};
+async function tambahUser() {
+  const d = { baru: true, id: $('#uId').value.trim(), nama: $('#uNama').value.trim(), peran: $('#uPeran').value, password: $('#uPw').value };
+  if (!d.id || !d.nama) return toast('Isi NIM/NIP dan nama', true);
+  await jalan(() => api('simpanUser', d));
+  segarkan('pengguna');
+}
+async function imporUser() {
+  const daftar = $('#uImpor').value.split('\n').map(b => b.split(/\t|;/).map(s => s.trim())).filter(b => b[0])
+    .map(b => ({ id: b[0], nama: b[1], peran: (b[2] || 'mahasiswa').toLowerCase() }));
+  if (!daftar.length) return toast('Belum ada data untuk diimpor', true);
+  await jalan(() => api('importUser', { daftar }));
+  segarkan('pengguna');
+}
+function editUser(id) {
+  const u = S.d.users.find(x => x.id === id);
+  modal('Ubah pengguna ' + esc(id), `<div class="fld"><label class="lbl">Nama</label><input class="inp" id="eNama" value="${esc(u.nama)}"></div>
+    <div class="fld"><label class="lbl">Peran</label><select class="inp" id="ePeran">${['mahasiswa', 'ci', 'admin'].map(x => `<option value="${x}" ${x === u.peran ? 'selected' : ''}>${PERAN[x]}</option>`).join('')}</select></div>
+    <div class="fld"><label class="lbl">Status</label><select class="inp" id="eAktif"><option value="ya">Aktif</option><option value="tidak" ${u.aktif !== 'ya' ? 'selected' : ''}>Nonaktif</option></select></div>`,
+    `<button class="btn" onclick="tutupModal()">Batal</button><button class="btn utama-btn" onclick="simpanEditUser('${esc(id)}')">Simpan</button>`, true);
+}
+async function simpanEditUser(id) {
+  await jalan(() => api('simpanUser', { id, nama: $('#eNama').value.trim(), peran: $('#ePeran').value, aktif: $('#eAktif').value }));
+  tutupModal(); segarkan('pengguna');
+}
+async function resetPw(id) { if (confirm('Reset password ' + id + ' menjadi NIM/NIP-nya?')) await jalan(() => api('resetPassword', { id })); }
+async function hapusUser(id) {
+  if (!confirm('Hapus pengguna ' + id + '? Data logbook tetap tersimpan.')) return;
+  await jalan(() => api('hapusUser', { id }));
+  segarkan('pengguna');
+}
+
+/* =================== AKUN =================== */
+VIEW.akun = () => {
+  $('#konten').innerHTML = `<div class="grid g2"><div class="kartu"><h3>Profil</h3><dl class="det" style="margin-top:10px">
+    <dt>Nama</dt><dd>${esc(S.user.nama)}</dd><dt>NIM/NIP</dt><dd>${esc(S.user.id)}</dd><dt>Peran</dt><dd>${PERAN[S.user.peran]}</dd></dl>
+    <button class="btn bahaya" style="margin-top:16px" onclick="keluar()">Keluar</button></div>
+  <form class="kartu" onsubmit="gantiPw(event)"><h3>Ganti password</h3>
+    <div class="fld" style="margin-top:10px"><label class="lbl">Password lama</label><input class="inp" type="password" id="pwLama" required></div>
+    <div class="fld"><label class="lbl">Password baru (min. 6 karakter)</label><input class="inp" type="password" id="pwBaru" minlength="6" required></div>
+    <div class="fld"><label class="lbl">Ulangi password baru</label><input class="inp" type="password" id="pwBaru2" required></div>
+    <button class="btn utama-btn">Simpan password</button></form></div>`;
+};
+async function gantiPw(e) {
+  e.preventDefault();
+  if ($('#pwBaru').value !== $('#pwBaru2').value) return toast('Ulangan password tidak sama', true);
+  await jalan(() => api('gantiPassword', { lama: $('#pwLama').value, baru: $('#pwBaru').value }));
+  e.target.reset();
+}
+
+/* =================== HALAMAN VERIFIKASI QR (publik) =================== */
+// Isi lembar tampil untuk siapa pun yang memindai QR.
+// Unduh PDF hanya untuk mahasiswa ybs, CI pembimbing, atau admin (dicek server lewat dataPdf).
+async function halamanVerifikasi(kode) {
+  S.verif = { kode };
+  $('#app').innerHTML = `<div class="vf-wrap"><div class="vf-isi" id="vk"><div class="kartu" style="text-align:center"><div class="spin" style="margin:20px auto"></div><p class="redup">Memeriksa keabsahan dokumen…</p></div></div></div>`;
+  let r;
+  try { r = await api('cekVerifikasi', { kode }); }
+  catch (e) { $('#vk').innerHTML = `<div class="kartu" style="text-align:center;color:var(--merah)">${esc(e.message)}</div>`; return; }
+  if (!r.sah) {
+    $('#vk').innerHTML = `<div class="kartu verif" style="text-align:center"><div class="ikon-besar" style="background:var(--merah-muda);color:var(--merah)"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+      <h1 style="font-size:20px">Tidak terverifikasi</h1><p class="redup">Kode QR tidak dikenal atau verifikasinya telah dibatalkan. Dokumen ini tidak dapat dinyatakan sah.</p></div>`;
+    return;
+  }
+  S.verif = Object.assign({ kode }, r);
+  gambarVerifikasi();
+}
+function gambarVerifikasi() {
+  const { mhs, penempatan: pen, logbook: lb } = S.verif;
+  const masuk = !!(S.token && S.user);
+  $('#vk').innerHTML = `<div class="kartu vf-sah"><div class="ikon-besar" style="background:var(--hijau-muda);color:var(--hijau);margin:0">${ikon('cek', 28)}</div>
+      <div style="flex:1;min-width:0"><b style="font-size:16px">Tanda tangan SAH</b>
+      <div class="kecil redup">Diverifikasi oleh ${esc(lb.nama_ci)} (NIP. ${formatNip(lb.nip_ci)}) pada ${tglIndo(lb.waktu_verifikasi, true)} pukul ${esc(lb.waktu_verifikasi.slice(11, 16))} WITA melalui SILOGBOOK.
+      Isi di bawah ini adalah data asli dari sistem; bandingkan dengan dokumen yang Anda pegang.</div></div></div>
+    <div class="kartu" style="padding:12px">${htmlKertas(lb, mhs, pen)}</div>
+    <div class="kartu vf-aksi">${masuk
+      ? `<div class="kecil redup" style="flex:1">Masuk sebagai <b>${esc(S.user.nama)}</b> (${PERAN[S.user.peran]})</div>
+         <button class="btn utama-btn" onclick="unduhVerif()">${ikon('unduh', 16)} Unduh PDF</button>`
+      : `<div class="kecil redup" style="flex:1">Unduh PDF hanya untuk mahasiswa yang bersangkutan, CI pembimbing, atau admin prodi.</div>
+         <button class="btn navy" onclick="loginVerif()">${ikon('akun', 16)} Masuk untuk unduh PDF</button>`}</div>
+    <p class="redup kecil" style="text-align:center">${INSTANSI.prodi}<br>${INSTANSI.jurusan}</p>`;
+}
+function loginVerif() {
+  modal('Masuk untuk mengunduh PDF', `<form id="fLv" onsubmit="kirimLoginVerif(event)">
+    <div class="fld"><label class="lbl">NIM / NIP</label><input class="inp" id="lvId" autocomplete="username" required></div>
+    <div class="fld"><label class="lbl">Password</label><input class="inp" id="lvPw" type="password" autocomplete="current-password" required></div>
+    <button class="btn utama-btn" style="width:100%;justify-content:center">Masuk</button></form>`, '', true);
+}
+async function kirimLoginVerif(e) {
+  e.preventDefault();
+  const r = await jalan(() => api('login', { id: $('#lvId').value.trim(), password: $('#lvPw').value }), false);
+  S.token = r.token; S.user = r.user;
+  try { localStorage.setItem('lb_token', r.token); localStorage.setItem('lb_user', JSON.stringify(r.user)); } catch (e) {}
+  tutupModal(); gambarVerifikasi();
+  unduhVerif();
+}
+async function unduhVerif() {
+  const { mhs, penempatan: pen, logbook: lb } = S.verif;
+  loading(true);
+  try {
+    const r = await api('dataPdf', { penempatan_id: pen.id, ids: [lb.id] });
+    if (!r.logbook.length) throw new Error('Logbook tidak tersedia');
+    unduhFile(await buatPdf([r], dasarUrl()), 'Logbook_' + namaFile(mhs.nama) + '_' + lb.tanggal + '.pdf');
+    toast('PDF diunduh');
+  } catch (e) {
+    toast(e.message === 'Akses ditolak' ? 'Akun Anda tidak berhak mengunduh logbook ini.' : e.message, true);
+    if (!S.token) gambarVerifikasi();
+  } finally { loading(false); }
+}
+
+/* =================== MULAI =================== */
+(function mulai() {
+  const v = new URLSearchParams(location.search).get('v');
+  if (v) return halamanVerifikasi(v);
+  if (S.token && S.user) masukApp(); else tampilLogin();
+})();
+</script>
+</body>
+</html>
